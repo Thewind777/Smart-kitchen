@@ -1,0 +1,25 @@
+# Internal Agent Files
+.antigravity/
+directives/
+brain/
+carrefour website/
+tmp/
+.gemini/
+
+# Frontend System
+frontend/node_modules/
+frontend/.next/
+frontend/.vercel/
+frontend/out/
+
+# Python/Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+.vscode/
+.idea/
+*.db

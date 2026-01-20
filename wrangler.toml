@@ -1,0 +1,17 @@
+name = "ruby-cassini-api"
+main = "src/worker.js"
+compatibility_date = "2024-03-20"
+account_id = "6d25e0c9b230efda05c2c9ce29d73a70"
+
+# Bindings
+[vars]
+SUPABASE_URL = "https://tqqluowrtaveukcrgiiz.supabase.co"
+# Note: In production, use `wrangler secret put` for keys. 
+# For dev/preview, we can map them from .env usually, but explicit mapping here helps locally.
+
+[[kv_namespaces]]
+binding = "SESSION_CACHE"
+id = "todo_create_kv_namespace_id"
+
+[site]
+bucket = "./public"
