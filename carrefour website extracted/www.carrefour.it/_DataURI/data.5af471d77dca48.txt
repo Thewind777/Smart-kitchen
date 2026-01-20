@@ -1,1 +1,0 @@
-chrome-extension://cecngibhkljoiafhjfmcgbmikfogdiko/sendMessage.js

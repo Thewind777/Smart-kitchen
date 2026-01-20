@@ -1,8 +1,0 @@
-{
-  "action": "ConsentTracking-SetSession",
-  "queryString": "consent=true",
-  "locale": "default",
-  "nonce": "46e3cf725f9ae88817d4418da5",
-  "originalUri": "https://www.carrefour.it/Sites-carrefour-IT-Site/default/ConsentTracking-SetSession?consent%3dtrue",
-  "success": true
-}
