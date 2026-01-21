@@ -65,9 +65,18 @@ export default function MealPlannerPage() {
                         <Calendar className="h-5 w-5 text-primary" />
                         Meal Planner
                     </h1>
-                    <Button size="sm" variant="outline" className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Generate Week
+                    <Button onClick={handleGenerateWeek} disabled={isGenerating} size="sm" variant="outline" className="gap-2">
+                        {isGenerating ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Generating...
+                            </>
+                        ) : (
+                            <>
+                                <Plus className="h-4 w-4" />
+                                Generate Week
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
@@ -80,8 +89,8 @@ export default function MealPlannerPage() {
                             key={day}
                             onClick={() => setSelectedDay(day)}
                             className={`min-w-[3rem] flex-1 rounded-xl py-2 text-sm font-medium transition-all ${selectedDay === day
-                                    ? "bg-primary text-primary-foreground shadow-md"
-                                    : "text-gray-500 hover:bg-gray-50"
+                                ? "bg-primary text-primary-foreground shadow-md"
+                                : "text-gray-500 hover:bg-gray-50"
                                 }`}
                         >
                             {day}
