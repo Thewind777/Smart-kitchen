@@ -52,23 +52,7 @@ export default function SearchPage() {
                 }
 
                 const data = await response.json();
-
-                // Transform API response to match ProductCard format
-                const transformedResults = data.results.map((product: any) => ({
-                    id: product.id,
-                    name: product.name,
-                    brand: product.brand,
-                    image: product.image,
-                    prices: [
-                        {
-                            store: product.store,
-                            price: product.price,
-                            isCheapest: true, // The API returns sorted by price
-                        },
-                    ],
-                }));
-
-                setResults(transformedResults);
+                setResults(data.results);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "An error occurred");
                 setResults([]);
