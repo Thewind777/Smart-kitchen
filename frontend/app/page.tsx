@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Search, Sparkles, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DealsCarousel } from "@/components/DealsCarousel";
 
 export default function Home() {
   return (
@@ -38,45 +39,17 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 2. DAILY DEALS (Mock) */}
+      {/* 2. DAILY DEALS (Real Data) */}
       <section className="mx-auto max-w-5xl px-4 py-12">
         <div className="mb-8 flex items-end justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">🔥 Today's Top Deals</h2>
-            <p className="text-gray-500">Prices verified 2 hours ago</p>
+            <p className="text-gray-500">Prices verified recently</p>
           </div>
-          <Button variant="ghost" className="text-primary">View All</Button>
         </div>
 
         {/* Horizontal Scroll / Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:shadow-md">
-              <div className="absolute top-3 left-3 z-10 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-                SAVE €2.50
-              </div>
-              <div className="aspect-video w-full bg-gray-100 p-4">
-                <img
-                  src={`https://placehold.co/600x400?text=Deal+${i}`}
-                  alt="Deal"
-                  className="h-full w-full object-cover mix-blend-multiply"
-                />
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-gray-900">Lavazza Coffee Beans (1kg)</h3>
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 line-through">€14.99</span>
-                    <span className="text-xl font-bold text-primary">€12.49</span>
-                  </div>
-                  <Button size="sm" variant="outline" className="rounded-full">
-                    Grab It
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DealsCarousel />
       </section>
 
       {/* 3. VALUE PROPS */}

@@ -1,62 +1,84 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
+import { Loader2, AlertCircle } from "lucide-react";
 
-// Mock Data (until we connect API)
-const MOCK_RESULTS = [
-    {
-        id: "1",
-        name: "Barilla Spaghetti n.5 (500g)",
-        brand: "Barilla",
-        image: "https://m.media-amazon.com/images/I/61S+0-S4SJL.jpg",
-        prices: [
-            { store: "Carrefour", price: 1.20, isCheapest: false },
-            { store: "Conad", price: 1.35, isCheapest: false },
-            { store: "Todis", price: 0.99, isCheapest: true },
-        ]
-    },
-    {
-        id: "2",
-        name: "Coca-Cola Original Taste (1.5L)",
-        brand: "Coca-Cola",
-        image: "https://m.media-amazon.com/images/I/51v8nyxSOYL._SL1500_.jpg",
-        prices: [
-            { store: "Carrefour", price: 1.80, isCheapest: true },
-            { store: "Conad", price: 2.10, isCheapest: false },
-        ]
-    },
-    {
-        id: "3",
-        name: "Mutti Tomato Puree (700g)",
-        brand: "Mutti",
-        image: "https://m.media-amazon.com/images/I/71wF7+b7HwL._AC_SL1500_.jpg",
-        prices: [
-            { store: "Carrefour", price: 1.45, isCheapest: false },
-            { store: "Todis", price: 1.15, isCheapest: true },
-            { store: "Glovo", price: 1.60, isCheapest: false },
-        ]
-    }
-];
+interface Product {
+    id: string;
+    name: string;
+    brand: string;
+    image: string;
+    price: number;
+    store: string;
+    original_price?: number;
+    savings: number;
+}
 
 export default function SearchPage() {
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState(MOCK_RESULTS);
+    const debouncedQuery = useDebounce(query, 300); // CFO requirement: prevent hammering API
+    const [results, setResults] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Simple client-side filter for demo
     useEffect(() => {
-        if (!query) {
-            setResults(MOCK_RESULTS);
-            return;
+        async function fetchResults() {
+            if (!debouncedQuery) {
+                setResults([]);
+                setError(null);
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                const response = await fetch(
+                    `/api/search?query=${encodeURIComponent(debouncedQuery)}`
+                );
+
+                if (response.status === 429) {
+                    setError("Too many requests. Please wait a moment.");
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch products");
+                }
+
+                const data = await response.json();
+
+                // Transform API response to match ProductCard format
+                const transformedResults = data.results.map((product: any) => ({
+                    id: product.id,
+                    name: product.name,
+                    brand: product.brand,
+                    image: product.image,
+                    prices: [
+                        {
+                            store: product.store,
+                            price: product.price,
+                            isCheapest: true, // The API returns sorted by price
+                        },
+                    ],
+                }));
+
+                setResults(transformedResults);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An error occurred");
+                setResults([]);
+            } finally {
+                setIsLoading(false);
+            }
         }
-        const filtered = MOCK_RESULTS.filter(r =>
-            r.name.toLowerCase().includes(query.toLowerCase()) ||
-            r.brand.toLowerCase().includes(query.toLowerCase())
-        );
-        setResults(filtered);
-    }, [query]);
+
+        fetchResults();
+    }, [debouncedQuery]);
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -80,13 +102,39 @@ export default function SearchPage() {
                     <span className="text-sm text-gray-500">{results.length} products</span>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {results.map((product) => (
-                        <ProductCard key={product.id} {...product} />
-                    ))}
-                </div>
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                )}
 
-                {results.length === 0 && (
+                {/* Error State */}
+                {error && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+                        <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+                        <p className="mt-2 text-red-800">{error}</p>
+                        <Button
+                            variant="outline"
+                            className="mt-4"
+                            onClick={() => setQuery("")}
+                        >
+                            Clear Search
+                        </Button>
+                    </div>
+                )}
+
+                {/* Results */}
+                {!isLoading && !error && results.length > 0 && (
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {results.map((product) => (
+                            <ProductCard key={product.id} {...product} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {!isLoading && !error && results.length === 0 && query && (
                     <div className="py-20 text-center">
                         <p className="text-gray-500">No products found matching your search.</p>
                         <Button
