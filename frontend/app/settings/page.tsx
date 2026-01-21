@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Palette, User, Heart } from "lucide-react";
+import { Check, Palette, User, Heart, LogIn, LogOut } from "lucide-react";
 import { useSettings } from "@/components/SettingsProvider";
+import { useAuth } from "@/components/AuthProvider";
+import { AuthModal } from "@/components/AuthModal";
+import { Button } from "@/components/ui/button";
 
 const THEMES = [
     { id: "cozy", name: "Cozy Modern", desc: "Warm Cream & Vibrant Orange", color: "bg-[#FFFBF0]" },
@@ -12,14 +16,17 @@ const THEMES = [
 ];
 
 const PERSONAS = [
-    { id: "generic", name: "Standard", desc: "Balanced mix of savings and quality." },
-    { id: "mom-saver", name: "Super Mom", desc: "Focus on Health Score (A-F) & fiber/sugar labels." },
-    { id: "gym-rat", name: "Gym Rat", desc: "Show me Protein/Macros first. I count every gram." },
-    { id: "student", name: "Broke Student", desc: "Price per calorie. Cheapest possible options." },
+    { id: "family-first", name: "Family First", desc: "Balanced savings and quality for the household." },
+    { id: "keto-warrior", name: "Keto Warrior", desc: "Low-carb, high-fat focus. Show net carbs first." },
+    { id: "gym-rat", name: "Gym Rat", desc: "High protein. I count every macro." },
+    { id: "old-money", name: "Old Money", desc: "Premium brands, value-conscious luxury." },
+    { id: "budget-hero", name: "Budget Hero", desc: "Price per calorie. Cheapest wins." },
 ];
 
 export default function SettingsPage() {
     const { theme, setTheme, persona, setPersona } = useSettings();
+    const { user, signOut } = useAuth();
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -31,6 +38,41 @@ export default function SettingsPage() {
             </div>
 
             <main className="mx-auto max-w-2xl px-4 py-8 space-y-10">
+
+                {/* AUTH SECTION */}
+                <section>
+                    <div className="mb-4 flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
+                        <h2 className="text-xl font-bold text-gray-900">Account</h2>
+                    </div>
+                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                        {user ? (
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="font-bold text-gray-900">Signed in</div>
+                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                </div>
+                                <Button onClick={signOut} variant="outline" size="sm" className="gap-2">
+                                    <LogOut className="h-4 w-4" />
+                                    Sign Out
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="font-bold text-gray-900">Not signed in</div>
+                                    <div className="text-sm text-gray-500">
+                                        Sign in to save your preferences
+                                    </div>
+                                </div>
+                                <Button onClick={() => setShowAuthModal(true)} size="sm" className="gap-2">
+                                    <LogIn className="h-4 w-4" />
+                                    Sign In
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
                 {/* THEME SELECTOR */}
                 <section>
@@ -44,8 +86,8 @@ export default function SettingsPage() {
                                 key={t.id}
                                 onClick={() => setTheme(t.id as any)}
                                 className={`relative flex items-center gap-4 rounded-xl border p-4 text-left transition-all ${theme === t.id
-                                        ? "border-primary ring-2 ring-primary ring-offset-2"
-                                        : "border-gray-200 hover:border-gray-300"
+                                    ? "border-primary ring-2 ring-primary ring-offset-2"
+                                    : "border-gray-200 hover:border-gray-300"
                                     }`}
                             >
                                 <div className={`h-12 w-12 rounded-full border border-gray-100 shadow-inner ${t.color}`} />
@@ -75,8 +117,8 @@ export default function SettingsPage() {
                                 key={p.id}
                                 onClick={() => setPersona(p.id as any)}
                                 className={`flex w-full items-center justify-between rounded-xl border p-4 transition-all ${persona === p.id
-                                        ? "border-primary bg-primary/5"
-                                        : "border-gray-200 bg-white hover:bg-gray-50"
+                                    ? "border-primary bg-primary/5"
+                                    : "border-gray-200 bg-white hover:bg-gray-50"
                                     }`}
                             >
                                 <div className="text-left">
@@ -94,6 +136,8 @@ export default function SettingsPage() {
                 </section>
 
             </main>
+
+            {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
+import { AuthProvider } from "@/components/AuthProvider";
 import { SettingsProvider } from "@/components/SettingsProvider";
 import "./globals.css";
 
@@ -29,12 +30,14 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} antialiased`}
       >
-        <SettingsProvider>
-          <NavBar />
-          <div className="md:pt-0 pb-20 md:pb-0">
-            {children}
-          </div>
-        </SettingsProvider>
+        <AuthProvider>
+          <SettingsProvider>
+            <NavBar />
+            <div className="md:pt-0 pb-20 md:pb-0">
+              {children}
+            </div>
+          </SettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
