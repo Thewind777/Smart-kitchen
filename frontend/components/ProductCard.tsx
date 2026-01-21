@@ -35,7 +35,7 @@ export function ProductCard({ name, image, brand, prices, price, store, macros, 
 
   // Find best price logic
   const bestPrice = normalizedPrices.length > 0 ? Math.min(...normalizedPrices.map((p) => p.price)) : 0;
-  const savings = Math.max(...prices.map((p) => p.price)) - bestPrice;
+  const savings = normalizedPrices.length > 0 ? Math.max(...normalizedPrices.map((p) => p.price)) - bestPrice : 0;
 
   // Default mocks if missing
   const demoMacros = macros || { protein: 12, carbs: 40, fat: 5, calories: 250 };
