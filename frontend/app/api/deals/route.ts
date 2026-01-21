@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         // 3. Fetch top deals (products with discounts)
         const { data: deals, error } = await supabase
             .from('products')
-            .select('id, name, brand, store, price, original_price, image_url')
+            .select('id, name, store, price, original_price, image_url')
             .not('original_price', 'is', null)
             .gt('original_price', supabase.ref('price'))
             .order('original_price', { ascending: false })

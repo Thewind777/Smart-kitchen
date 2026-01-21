@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
         let dbQuery = supabase
             .from('products')
-            .select('id, name, brand, store, price, original_price, image_url', { count: 'exact' })
+            .select('id, name, store, price, original_price, image_url', { count: 'exact' })
             .textSearch('fts', searchQuery, {
                 type: 'websearch',
                 config: 'english',
