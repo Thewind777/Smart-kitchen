@@ -94,7 +94,7 @@ export function ProductCard({ name, image, brand, prices, price, store, macros, 
 
         {/* Price Grid */}
         <div className="mt-auto space-y-2">
-          {prices.map((p, idx) => (
+          {normalizedPrices.map((p, idx) => (
             <div
               key={idx}
               className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm ${p.price === bestPrice
