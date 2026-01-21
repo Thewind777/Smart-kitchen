@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { ratelimit } from '@/lib/rate-limit';
 
+export const runtime = 'edge';
+
 // Input validation schema
 const cartSchema = z.object({
     items: z.array(z.string().min(1).max(100)).min(1).max(50),

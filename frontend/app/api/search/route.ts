@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { ratelimit } from '@/lib/rate-limit';
 
+export const runtime = 'edge';
+
 // Input validation schema (Security requirement from review)
 const searchSchema = z.object({
     query: z.string().min(1).max(100),

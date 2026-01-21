@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { ratelimit } from '@/lib/rate-limit';
 
+export const runtime = 'edge';
+
 // Input validation schema
 const recipesSchema = z.object({
     limit: z.number().int().min(1).max(100).optional().default(10),
