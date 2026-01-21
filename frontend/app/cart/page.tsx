@@ -2,54 +2,73 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, CheckCircle2, ArrowRight, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ShoppingBag, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
-// Mock response simulating "cart_optimizer.py"
-const MOCK_OPTIMIZATION = {
-    saved: 8.50,
-    total_original: 45.20,
-    total_optimized: 36.70,
-    stores: [
-        {
-            name: "Todis",
-            total: 15.50,
-            color: "bg-blue-600",
-            items: [
-                { name: "Milk (1L)", price: 0.99 },
-                { name: "Eggs (6 pack)", price: 1.50 },
-                { name: "Bread", price: 1.10 },
-                { name: "Generic Pasta (500g)", price: 0.65 },
-            ]
-        },
-        {
-            name: "Carrefour",
-            total: 21.20,
-            color: "bg-blue-800",
-            items: [
-                { name: "Barilla Sauce", price: 1.80 },
-                { name: "Chicken Breast", price: 5.50 },
-                { name: "Olive Oil", price: 4.90 },
-                { name: "Coffee", price: 3.50 },
-            ]
-        }
-    ]
-};
+interface OptimizationResult {
+    saved: number;
+    total_original: number;
+    total_optimized: number;
+    stores: Array<{
+        store: string;
+        total: number;
+        items: Array<{
+            name: string;
+            price: number;
+            originalQuery: string;
+        }>;
+    }>;
+    notFound: string[];
+}
 
 export default function SmartCartPage() {
     const [input, setInput] = useState("");
     const [isOptimizing, setIsOptimizing] = useState(false);
-    const [result, setResult] = useState<typeof MOCK_OPTIMIZATION | null>(null);
+    const [result, setResult] = useState<OptimizationResult | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleOptimize = () => {
+    const handleOptimize = async () => {
         if (!input) return;
+
         setIsOptimizing(true);
-        // Simulate API delay
-        setTimeout(() => {
-            setResult(MOCK_OPTIMIZATION);
+        setError(null);
+
+        try {
+            // Parse input into array of items
+            const items = input
+                .split(/\n|,/)
+                .map((item) => item.trim())
+                .filter((item) => item.length > 0);
+
+            if (items.length === 0) {
+                setError("Please enter at least one item");
+                setIsOptimizing(false);
+                return;
+            }
+
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items }),
+            });
+
+            if (response.status === 429) {
+                setError("Too many requests. Please wait a moment.");
+        setIs Optimizing(false);
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to optimize cart');
+            }
+
+            const data = await response.json();
+            setResult(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
             setIsOptimizing(false);
-        }, 1500);
+        }
     };
 
     return (
@@ -62,7 +81,6 @@ export default function SmartCartPage() {
             </div>
 
             <main className="mx-auto max-w-4xl px-4 py-8">
-
                 {/* INPUT SECTION */}
                 <div className="rounded-xl bg-white p-6 shadow-sm">
                     <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -83,7 +101,7 @@ export default function SmartCartPage() {
                         >
                             {isOptimizing ? (
                                 <span className="flex items-center gap-2">
-                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
                                     Crunching Numbers...
                                 </span>
                             ) : (
@@ -95,6 +113,14 @@ export default function SmartCartPage() {
                         </Button>
                     </div>
                 </div>
+
+                {/* ERROR STATE */}
+                {error && (
+                    <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+                        <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+                        <p className="mt-2 text-red-800">{error}</p>
+                    </div>
+                )}
 
                 {/* RESULTS SECTION */}
                 {result && (
@@ -111,20 +137,37 @@ export default function SmartCartPage() {
                                     <p className="text-4xl font-extrabold">€{result.saved.toFixed(2)}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm text-emerald-100 line-through">Estimated: €{result.total_original.toFixed(2)}</p>
+                                    <p className="text-sm text-emerald-100 line-through">
+                                        Estimated: €{result.total_original.toFixed(2)}
+                                    </p>
                                     <p className="text-xl font-bold">Pay Only: €{result.total_optimized.toFixed(2)}</p>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Not Found Items */}
+                        {result.notFound && result.notFound.length > 0 && (
+                            <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                <p className="text-sm font-medium text-amber-800">
+                                    Could not find: {result.notFound.join(", ")}
+                                </p>
+                            </div>
+                        )}
+
                         {/* Split View */}
                         <h2 className="mb-4 text-xl font-bold text-gray-900">Your Action Plan</h2>
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {result.stores.map((store, idx) => (
-                                <div key={idx} className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                    <div className={`px-4 py-3 ${idx === 0 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>
+                                <div
+                                    key={idx}
+                                    className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+                                >
+                                    <div
+                                        className={`px-4 py-3 ${idx === 0 ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"
+                                            }`}
+                                    >
                                         <div className="flex items-center justify-between">
-                                            <h3 className="font-bold">{store.name}</h3>
+                                            <h3 className="font-bold">{store.store}</h3>
                                             <span className="text-sm font-semibold">€{store.total.toFixed(2)}</span>
                                         </div>
                                     </div>
@@ -140,9 +183,6 @@ export default function SmartCartPage() {
                                                 </li>
                                             ))}
                                         </ul>
-                                        <Button className="mt-6 w-full" variant="outline" size="sm">
-                                            Send List to WhatsApp
-                                        </Button>
                                     </div>
                                 </div>
                             ))}
