@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
         if (!validation.success) {
             return NextResponse.json(
-                { error: 'Invalid search parameters', details: validation.error.errors },
+                { error: 'Invalid search parameters', details: validation.error.issues },
                 { status: 400 }
             );
         }
