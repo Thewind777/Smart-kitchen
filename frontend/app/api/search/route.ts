@@ -129,7 +129,6 @@ export async function GET(request: NextRequest) {
         const formattedResults = results.map((row) => ({
             id: row.id,
             name: row.name,
-            brand: row.brand || 'Generic',
             store: row.store,
             price: row.price,
             original_price: row.original_price,

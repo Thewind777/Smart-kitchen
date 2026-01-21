@@ -50,7 +50,6 @@ export async function GET(request: NextRequest) {
             .map((product) => ({
                 id: product.id,
                 name: product.name,
-                brand: product.brand || 'Generic',
                 store: product.store,
                 price: product.price,
                 originalPrice: product.original_price,
