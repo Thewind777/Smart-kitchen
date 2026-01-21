@@ -16,18 +16,25 @@ interface ProductCardProps {
   name: string;
   image: string;
   brand: string;
-  prices: StorePrice[];
+  prices?: StorePrice[]; // Optional - for multi-store comparison
   // Mock Health Data for Demo
   macros?: { protein: number; carbs: number; fat: number; calories: number };
   healthScore?: "A" | "B" | "C" | "D" | "E";
   badges?: string[];
+  // Single-store format (from API)
+  price?: number;
+  store?: string;
+  savings?: number;
 }
 
-export function ProductCard({ name, image, brand, prices, macros, healthScore, badges }: ProductCardProps) {
+export function ProductCard({ name, image, brand, prices, price, store, macros, healthScore, badges }: ProductCardProps) {
   const { persona } = useSettings();
 
+  // Normalize to prices array format
+  const normalizedPrices = prices || (price !== undefined && store ? [{ store, price, isCheapest: true }] : []);
+
   // Find best price logic
-  const bestPrice = Math.min(...prices.map((p) => p.price));
+  const bestPrice = normalizedPrices.length > 0 ? Math.min(...normalizedPrices.map((p) => p.price)) : 0;
   const savings = Math.max(...prices.map((p) => p.price)) - bestPrice;
 
   // Default mocks if missing
@@ -91,8 +98,8 @@ export function ProductCard({ name, image, brand, prices, macros, healthScore, b
             <div
               key={idx}
               className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm ${p.price === bestPrice
-                  ? "border border-primary/30 bg-primary/5 font-bold text-primary ring-1 ring-primary/20"
-                  : "opacity-80"
+                ? "border border-primary/30 bg-primary/5 font-bold text-primary ring-1 ring-primary/20"
+                : "opacity-80"
                 }`}
             >
               <span>{p.store}</span>
